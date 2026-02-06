@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>השוואת יחסי הימורים</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .fixture-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .fixture-info h2 {
+            margin-bottom: 10px;
+        }
+
+        .bookmakers-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .bookmaker-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .bookmaker-card h3 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table th {
+            font-weight: 600;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .bet-type-header {
+            background: #e9ecef;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .odd-value {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .difference {
+            font-weight: 600;
+        }
+
+        .difference.positive {
+            color: #28a745;
+        }
+
+        .difference.negative {
+            color: #dc3545;
+        }
+
+        .difference.neutral {
+            color: #6c757d;
+        }
+
+        .better-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .better-badge.bookmaker1 {
+            background: #28a745;
+            color: white;
+        }
+
+        .better-badge.bookmaker2 {
+            background: #dc3545;
+            color: white;
+        }
+
+        .better-badge.equal {
+            background: #6c757d;
+            color: white;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚽ השוואת יחסי הימורים</h1>
+            <p>השווה בין שני ספקי הימורים שונים</p>
+        </div>
+
+        <div class="content">
+            <!-- Section 1: View all fixtures for a date -->
+            <div class="form-section" style="margin-bottom: 30px;">
+                <h2 style="margin-bottom: 15px; color: #667eea;">📅 צפה בכל המשחקים של היום</h2>
+                <div class="form-group">
+                    <label for="view_date">בחר תאריך</label>
+                    <input type="date" id="view_date" name="view_date" required>
+                    <button type="button" class="btn-secondary" id="viewFixturesBtn" style="margin-top: 10px; width: auto; padding: 10px 20px; background: #6c757d;">הצג משחקים</button>
+                </div>
+                <div id="allFixturesList" style="margin-top: 20px; display: none;"></div>
+            </div>
+
+            <!-- Section 2: Compare odds -->
+            <div class="form-section">
+                <h2 style="margin-bottom: 15px; color: #667eea;">⚖️ השוואת יחסי הימורים</h2>
+                <div class="info-box">
+                    <strong>איך להשתמש:</strong> בחר תאריך (וחלופית ליגה) כדי לראות משחקים מעונת 2025, בחר משחק והשווה בין Pinnacle ו-Bet365.
+                </div>
+
+                <form id="compareForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fixture_date">תאריך משחק</label>
+                            <input type="date" id="fixture_date" name="fixture_date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="league_id">ליגה (אופציונלי)</label>
+                            <select id="league_id" name="league_id">
+                                <option value="">כל הליגות</option>
+                                <option value="119">League 119</option>
+                                <option value="207">League 207</option>
+                                <option value="144">League 144</option>
+                                <option value="79">League 79</option>
+                                <option value="40">League 40</option>
+                                <option value="88">League 88</option>
+                                <option value="62">League 62</option>
+                                <option value="203">League 203</option>
+                                <option value="94">League 94</option>
+                                <option value="140">League 140</option>
+                                <option value="141">League 141</option>
+                                <option value="39">League 39</option>
+                                <option value="136">League 136</option>
+                                <option value="61">League 61</option>
+                                <option value="78">League 78</option>
+                                <option value="135">League 135</option>
+                                <option value="128">League 128</option>
+                                <option value="253">League 253</option>
+                                <option value="113">League 113</option>
+                                <option value="103">League 103</option>
+                                <option value="169">League 169</option>
+                                <option value="71">League 71</option>
+                                <option value="98">League 98</option>
+                                <option value="262">League 262</option>
+                                <option value="2">League 2</option>
+                                <option value="3">League 3</option>
+                                <option value="848">League 848</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-secondary" id="loadFixturesBtn" style="margin-top: 10px; width: auto; padding: 10px 20px; background: #6c757d;">טען משחקים</button>
+
+                    <div class="form-group" id="fixtureGroup" style="display: none;">
+                        <label for="fixture_id">בחר משחק</label>
+                        <select id="fixture_id" name="fixture_id" required>
+                            <option value="">-- בחר משחק --</option>
+                        </select>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 20px;">
+                        <strong>השוואה תמיד תתבצע בין:</strong><br>
+                        📊 ספק ראשון: <strong>Pinnacle (ID: 4)</strong><br>
+                        📊 ספק שני: <strong>Bet365 (ID: 8)</strong><br>
+                        <small>מוצגות רק הזדמנויות שבהן Bet365 טוב יותר ב־2% ומעלה.</small>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <button type="submit" class="btn" id="compareBtn" disabled>השווה משחק נבחר</button>
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn" id="compareAllBtn" disabled>השווה את כל המשחקים ביום זה</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>טוען נתונים...</p>
+            </div>
+
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('compareForm');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const compareBtn = document.getElementById('compareBtn');
+        const compareAllBtn = document.getElementById('compareAllBtn');
+        const loadFixturesBtn = document.getElementById('loadFixturesBtn');
+        const viewFixturesBtn = document.getElementById('viewFixturesBtn');
+        const fixtureDate = document.getElementById('fixture_date');
+        const viewDate = document.getElementById('view_date');
+        const leagueSelect = document.getElementById('league_id');
+        const fixtureSelect = document.getElementById('fixture_id');
+        const allFixturesList = document.getElementById('allFixturesList');
+
+        // Fixed values
+        const BOOKMAKER1_ID = 4;  // Pinnacle
+        const BOOKMAKER2_ID = 8;  // Bet365
+        const SEASON = 2025;      // Always 2025
+
+        // Leagues we care about (filter for both views)
+        const TRACKED_LEAGUE_IDS = new Set([
+            "119","207","144","79","40","88","62","203","94","140","141",
+            "39","136","61","78","135","128","253","113","103","169","71",
+            "98","262","2","3","848"
+        ]);
+
+        let fixturesList = [];
+        let leaguesMap = {}; // Map of league IDs to names
+
+        // Load fixtures for selected date and league
+        loadFixturesBtn.addEventListener('click', async () => {
+            const date = fixtureDate.value;
+            if (!date) {
+                alert('אנא בחר תאריך');
+                return;
+            }
+
+            const leagueId = leagueSelect.value;
+            loadFixturesBtn.disabled = true;
+            loadFixturesBtn.textContent = 'טוען...';
+            fixtureSelect.innerHTML = '<option value="">-- טוען משחקים... --</option>';
+
+            try {
+                let url = `/api/fixtures?date=${date}&season=${SEASON}`;
+                if (leagueId) {
+                    url += `&league=${leagueId}`;
+                }
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.response && data.response.length > 0) {
+                    // Filter to tracked leagues only when "all leagues" is selected
+                    const filteredForCompare = data.response.filter(fix =>
+                        TRACKED_LEAGUE_IDS.has(String(fix.league.id))
+                    );
+
+                    if (filteredForCompare.length === 0) {
+                        fixtureSelect.innerHTML = '<option value="">לא נמצאו משחקים בליגות המסוקרות בתאריך זה</option>';
+                        document.getElementById('fixtureGroup').style.display = 'block';
+                        compareAllBtn.disabled = true;
+                        return;
+                    }
+
+                    fixturesList = filteredForCompare;
+                    fixtureSelect.innerHTML = '<option value="">-- בחר משחק --</option>';
+                    
+                    // Update league names in dropdown
+                    filteredForCompare.forEach(fixture => {
+                        const leagueId = fixture.league.id;
+                        const leagueName = fixture.league.name;
+                        const country = fixture.league.country;
+                        leaguesMap[leagueId] = `${leagueName} - ${country}`;
+                        
+                        // Update dropdown option if exists
+                        const option = leagueSelect.querySelector(`option[value="${leagueId}"]`);
+                        if (option) {
+                            option.textContent = `${leagueName} - ${country} (${leagueId})`;
+                        }
+                    });
+                    
+                    filteredForCompare.forEach(fixture => {
+                        const option = document.createElement('option');
+                        option.value = fixture.fixture.id;
+                        const homeTeam = fixture.teams.home.name;
+                        const awayTeam = fixture.teams.away.name;
+                        const league = fixture.league.name;
+                        option.textContent = `${homeTeam} vs ${awayTeam} (${league})`;
+                        fixtureSelect.appendChild(option);
+                    });
+                    
+                    document.getElementById('fixtureGroup').style.display = 'block';
+                    compareAllBtn.disabled = false;
+                } else {
+                    fixtureSelect.innerHTML = '<option value="">לא נמצאו משחקים בתאריך זה</option>';
+                }
+            } catch (error) {
+                console.error('Error loading fixtures:', error);
+                fixtureSelect.innerHTML = '<option value="">שגיאה בטעינת משחקים</option>';
+            } finally {
+                loadFixturesBtn.disabled = false;
+                loadFixturesBtn.textContent = 'טען משחקים';
+            }
+        });
+
+        // Enable compare button when fixture is selected
+        function checkFormReady() {
+            const fixtureId = fixtureSelect.value;
+            
+            if (fixtureId) {
+                compareBtn.disabled = false;
+            } else {
+                compareBtn.disabled = true;
+            }
+        }
+
+        fixtureSelect.addEventListener('change', checkFormReady);
+
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        fixtureDate.value = today;
+        viewDate.value = today;
+
+        // Load all fixtures for viewing (without odds comparison)
+        viewFixturesBtn.addEventListener('click', async () => {
+            const date = viewDate.value;
+            if (!date) {
+                alert('אנא בחר תאריך');
+                return;
+            }
+
+            viewFixturesBtn.disabled = true;
+            viewFixturesBtn.textContent = 'טוען...';
+            allFixturesList.innerHTML = '<p>טוען משחקים...</p>';
+            allFixturesList.style.display = 'block';
+
+            try {
+                const url = `/api/fixtures?date=${date}&season=${SEASON}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.response && data.response.length > 0) {
+                    // Filter to tracked leagues only
+                    const filtered = data.response.filter(fix =>
+                        TRACKED_LEAGUE_IDS.has(String(fix.league.id))
+                    );
+
+                    if (filtered.length === 0) {
+                        allFixturesList.innerHTML = '<p style="color: #dc3545;">לא נמצאו משחקים בליגות המסוקרות בתאריך זה</p>';
+                    } else {
+                        // Sort by kickoff time (earliest to latest)
+                        filtered.sort((a, b) =>
+                            new Date(a.fixture.date) - new Date(b.fixture.date)
+                        );
+
+                        let html = '<div style="max-height: 500px; overflow-y: auto;">';
+                        html += '<div style="display: grid; gap: 10px;">';
+
+                        filtered.forEach(fixture => {
+                            const leagueId = fixture.league.id;
+                            const leagueName = fixture.league.name;
+                            const country = fixture.league.country;
+                            
+                            // Update leagues map and dropdown option text
+                            leaguesMap[leagueId] = `${leagueName} - ${country}`;
+                            const leagueOption = leagueSelect.querySelector(`option[value="${leagueId}"]`);
+                            if (leagueOption) {
+                                leagueOption.textContent = `${leagueName} - ${country} (${leagueId})`;
+                            }
+
+                            const homeTeam = fixture.teams.home.name;
+                            const awayTeam = fixture.teams.away.name;
+                            const time = new Date(fixture.fixture.date).toLocaleTimeString('he-IL', {hour: '2-digit', minute: '2-digit'});
+                            html += `<div style="padding: 10px; background: white; border-radius: 5px; border-right: 4px solid #667eea;">`;
+                            html += `<div style="font-size: 0.9em; color: #6c757d; margin-bottom: 4px;">${leagueName} - ${country}</div>`;
+                            html += `<strong>${time}</strong> - ${homeTeam} 🆚 ${awayTeam}`;
+                            html += `</div>`;
+                        });
+
+                        html += '</div></div>';
+                        allFixturesList.innerHTML = html;
+                    }
+                } else {
+                    allFixturesList.innerHTML = '<p style="color: #dc3545;">לא נמצאו משחקים בתאריך זה</p>';
+                }
+            } catch (error) {
+                console.error('Error loading fixtures:', error);
+                allFixturesList.innerHTML = '<p style="color: #dc3545;">שגיאה בטעינת משחקים</p>';
+            } finally {
+                viewFixturesBtn.disabled = false;
+                viewFixturesBtn.textContent = 'הצג משחקים';
+            }
+        });
+
+        // Compare all fixtures for the selected date (and optional league)
+        compareAllBtn.addEventListener('click', async () => {
+            if (!fixturesList.length) {
+                alert('קודם טען משחקים לתאריך הזה');
+                return;
+            }
+
+            loading.classList.add('active');
+            results.classList.remove('active');
+            results.innerHTML = '';
+            compareBtn.disabled = true;
+            compareAllBtn.disabled = true;
+
+            try {
+                const opportunities = [];
+
+                for (const fixture of fixturesList) {
+                    const fixtureId = fixture.fixture.id;
+                    try {
+                        const response = await fetch('/api/compare', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                fixture_id: fixtureId,
+                                bookmaker1_id: BOOKMAKER1_ID,
+                                bookmaker2_id: BOOKMAKER2_ID,
+                            }),
+                        });
+
+                        const data = await response.json();
+                        if (!response.ok || data.error) {
+                            console.error('Compare error for fixture', fixtureId, data.error || response.status);
+                            continue;
+                        }
+
+                        if (data.comparisons && data.comparisons.length > 0) {
+                            opportunities.push(data);
+                        }
+                    } catch (e) {
+                        console.error('Error comparing fixture', fixtureId, e);
+                    }
+                }
+
+                if (!opportunities.length) {
+                    results.innerHTML = '<div class="error"><strong>לא נמצאו הזדמנויות שבהן Bet365 טובה לפחות ב־2% עבור התאריך הזה.</strong></div>';
+                    results.classList.add('active');
+                    return;
+                }
+
+                let html = '';
+                opportunities.forEach(data => {
+                    const fixture = data.fixture;
+                    const league = data.league;
+                    const date = new Date(fixture.date);
+                    const formattedDate = date.toLocaleString('he-IL', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                    });
+
+                    // Get team names safely
+                    let homeTeam = 'קבוצה ביתית';
+                    let awayTeam = 'קבוצה אורחת';
+                    if (fixture.teams) {
+                        homeTeam = fixture.teams.home ? fixture.teams.home.name : homeTeam;
+                        awayTeam = fixture.teams.away ? fixture.teams.away.name : awayTeam;
+                    }
+
+                    html += `
+                        <div class="fixture-info">
+                            <h2>${homeTeam} 🆚 ${awayTeam}</h2>
+                            <p><strong>ליגה:</strong> ${league.name || 'ליגה'}</p>
+                            <p><strong>תאריך:</strong> ${formattedDate}</p>
+                            <p><strong>מספר משחק:</strong> ${data.fixture_id}</p>
+                        </div>
+                    `;
+
+                    html += `
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>סוג הימור</th>
+                                    <th>ערך</th>
+                                    <th>Pinnacle</th>
+                                    <th>Bet365</th>
+                                    <th>הפרש</th>
+                                    <th>אחוז הפרש</th>
+                                    <th>טוב יותר</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.comparisons.forEach(comparison => {
+                        html += `
+                            <tr class="bet-type-header">
+                                <td colspan="7"><strong>${comparison.bet_name}</strong></td>
+                            </tr>
+                        `;
+
+                        comparison.values.forEach(value => {
+                            const diffClass = value.difference > 0 ? 'positive' : value.difference < 0 ? 'negative' : 'neutral';
+                            const betterBadge = value.better === 'bookmaker2'
+                                ? `<span class="better-badge bookmaker2">Bet365</span>`
+                                : `<span class="better-badge equal">שווה</span>`;
+
+                            html += `
+                                <tr>
+                                    <td></td>
+                                    <td><strong>${value.value}</strong></td>
+                                    <td><span class="odd-value">${value.bookmaker1_odd}</span></td>
+                                    <td><span class="odd-value">${value.bookmaker2_odd}</span></td>
+                                    <td><span class="difference ${diffClass}">${value.difference > 0 ? '+' : ''}${value.difference}</span></td>
+                                    <td><span class="difference ${diffClass}">${value.percent_difference > 0 ? '+' : ''}${value.percent_difference}%</span></td>
+                                    <td>${betterBadge}</td>
+                                </tr>
+                            `;
+                        });
+                    });
+
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                });
+
+                results.innerHTML = html;
+                results.classList.add('active');
+            } catch (error) {
+                console.error('Error in compareAllBtn handler', error);
+                results.innerHTML = `<div class="error"><strong>שגיאה:</strong> ${error.message || error}</div>`;
+                results.classList.add('active');
+            } finally {
+                loading.classList.remove('active');
+                compareAllBtn.disabled = false;
+                checkFormReady();
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fixtureId = fixtureSelect.value;
+            const bookmaker1Id = BOOKMAKER1_ID;  // Pinnacle
+            const bookmaker2Id = BOOKMAKER2_ID;   // Bet365
+
+            // Show loading
+            loading.classList.add('active');
+            results.classList.remove('active');
+            results.innerHTML = '';
+            compareBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/compare', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fixture_id: parseInt(fixtureId),
+                        bookmaker1_id: bookmaker1Id,
+                        bookmaker2_id: bookmaker2Id
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'שגיאה בהשוואה');
+                }
+
+                displayResults(data);
+            } catch (error) {
+                results.innerHTML = `<div class="error"><strong>שגיאה:</strong> ${error.message}</div>`;
+                results.classList.add('active');
+            } finally {
+                loading.classList.remove('active');
+                compareBtn.disabled = false;
+            }
+        });
+
+        function displayResults(data) {
+            if (data.error) {
+                results.innerHTML = `<div class="error"><strong>שגיאה:</strong> ${data.error}</div>`;
+                results.classList.add('active');
+                return;
+            }
+
+            const fixture = data.fixture;
+            const league = data.league;
+            const date = new Date(fixture.date);
+            const formattedDate = date.toLocaleString('he-IL', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Get team names from fixture
+            let homeTeam = 'קבוצה ביתית';
+            let awayTeam = 'קבוצה אורחת';
+            let matchStatus = '';
+            
+            if (fixture.teams) {
+                homeTeam = fixture.teams.home ? fixture.teams.home.name : homeTeam;
+                awayTeam = fixture.teams.away ? fixture.teams.away.name : awayTeam;
+            }
+            
+            if (fixture.status) {
+                matchStatus = fixture.status.long || fixture.status.short || '';
+            }
+
+            let html = `
+                <div class="fixture-info">
+                    <h2>${homeTeam} 🆚 ${awayTeam}</h2>
+                    <p><strong>ליגה:</strong> ${league.name || 'ליגה'}</p>
+                    <p><strong>תאריך:</strong> ${formattedDate}</p>
+                    ${matchStatus ? `<p><strong>סטטוס:</strong> ${matchStatus}</p>` : ''}
+                    <p><strong>מספר משחק:</strong> ${data.fixture_id}</p>
+                </div>
+
+                <div class="bookmakers-header">
+                    <div class="bookmaker-card">
+                        <h3>Pinnacle</h3>
+                        <p>${data.bookmaker1.name || 'Bookmaker 1'}</p>
+                    </div>
+                    <div class="bookmaker-card" style="background: #e9ecef;">
+                        <h3>השוואה</h3>
+                        <p>יחסי הימורים</p>
+                    </div>
+                    <div class="bookmaker-card">
+                        <h3>Bet365</h3>
+                        <p>${data.bookmaker2.name || 'Bookmaker 2'}</p>
+                    </div>
+                </div>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>סוג הימור</th>
+                            <th>ערך</th>
+                            <th>Pinnacle</th>
+                            <th>Bet365</th>
+                            <th>הפרש</th>
+                            <th>אחוז הפרש</th>
+                            <th>טוב יותר</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.comparisons.forEach(comparison => {
+                html += `
+                    <tr class="bet-type-header">
+                        <td colspan="7"><strong>${comparison.bet_name}</strong></td>
+                    </tr>
+                `;
+
+                comparison.values.forEach(value => {
+                    const diffClass = value.difference > 0 ? 'positive' : value.difference < 0 ? 'negative' : 'neutral';
+                    const betterBadge = value.better === 'bookmaker1' 
+                        ? `<span class="better-badge bookmaker1">Pinnacle</span>`
+                        : value.better === 'bookmaker2'
+                        ? `<span class="better-badge bookmaker2">Bet365</span>`
+                        : `<span class="better-badge equal">שווה</span>`;
+
+                    html += `
+                        <tr>
+                            <td></td>
+                            <td><strong>${value.value}</strong></td>
+                            <td><span class="odd-value">${value.bookmaker1_odd}</span></td>
+                            <td><span class="odd-value">${value.bookmaker2_odd}</span></td>
+                            <td><span class="difference ${diffClass}">${value.difference > 0 ? '+' : ''}${value.difference}</span></td>
+                            <td><span class="difference ${diffClass}">${value.percent_difference > 0 ? '+' : ''}${value.percent_difference}%</span></td>
+                            <td>${betterBadge}</td>
+                        </tr>
+                    `;
+                });
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            results.innerHTML = html;
+            results.classList.add('active');
+        }
+    </script>
+</body>
+</html>
