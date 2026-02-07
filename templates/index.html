@@ -660,12 +660,20 @@
                         minute: '2-digit',
                     });
 
-                    // Get team names safely
+                    // Get team names safely - try from fixture first, then from fixturesList
                     let homeTeam = 'קבוצה ביתית';
                     let awayTeam = 'קבוצה אורחת';
+                    
                     if (fixture.teams) {
                         homeTeam = fixture.teams.home ? fixture.teams.home.name : homeTeam;
                         awayTeam = fixture.teams.away ? fixture.teams.away.name : awayTeam;
+                    } else {
+                        // Try to get from fixturesList
+                        const foundFixture = fixturesList.find(f => f.fixture.id === data.fixture_id);
+                        if (foundFixture && foundFixture.teams) {
+                            homeTeam = foundFixture.teams.home ? foundFixture.teams.home.name : homeTeam;
+                            awayTeam = foundFixture.teams.away ? foundFixture.teams.away.name : awayTeam;
+                        }
                     }
 
                     html += `
@@ -685,7 +693,6 @@
                                     <th>ערך</th>
                                     <th>Pinnacle</th>
                                     <th>Bet365</th>
-                                    <th>הפרש</th>
                                     <th>אחוז הפרש</th>
                                     <th>טוב יותר</th>
                                 </tr>
@@ -696,12 +703,12 @@
                     data.comparisons.forEach(comparison => {
                         html += `
                             <tr class="bet-type-header">
-                                <td colspan="7"><strong>${comparison.bet_name}</strong></td>
+                                <td colspan="6"><strong>${comparison.bet_name}</strong></td>
                             </tr>
                         `;
 
                         comparison.values.forEach(value => {
-                            const diffClass = value.difference > 0 ? 'positive' : value.difference < 0 ? 'negative' : 'neutral';
+                            const diffClass = value.percent_difference > 0 ? 'positive' : value.percent_difference < 0 ? 'negative' : 'neutral';
                             const betterBadge = value.better === 'bookmaker2'
                                 ? `<span class="better-badge bookmaker2">Bet365</span>`
                                 : `<span class="better-badge equal">שווה</span>`;
@@ -712,7 +719,6 @@
                                     <td><strong>${value.value}</strong></td>
                                     <td><span class="odd-value">${value.bookmaker1_odd}</span></td>
                                     <td><span class="odd-value">${value.bookmaker2_odd}</span></td>
-                                    <td><span class="difference ${diffClass}">${value.difference > 0 ? '+' : ''}${value.difference}</span></td>
                                     <td><span class="difference ${diffClass}">${value.percent_difference > 0 ? '+' : ''}${value.percent_difference}%</span></td>
                                     <td>${betterBadge}</td>
                                 </tr>
@@ -799,18 +805,20 @@
                 minute: '2-digit'
             });
 
-            // Get team names from fixture
+            // Get team names - try from fixture first, then from fixturesList
             let homeTeam = 'קבוצה ביתית';
             let awayTeam = 'קבוצה אורחת';
-            let matchStatus = '';
             
             if (fixture.teams) {
                 homeTeam = fixture.teams.home ? fixture.teams.home.name : homeTeam;
                 awayTeam = fixture.teams.away ? fixture.teams.away.name : awayTeam;
-            }
-            
-            if (fixture.status) {
-                matchStatus = fixture.status.long || fixture.status.short || '';
+            } else {
+                // Try to get from fixturesList
+                const foundFixture = fixturesList.find(f => f.fixture.id === data.fixture_id);
+                if (foundFixture && foundFixture.teams) {
+                    homeTeam = foundFixture.teams.home ? foundFixture.teams.home.name : homeTeam;
+                    awayTeam = foundFixture.teams.away ? foundFixture.teams.away.name : awayTeam;
+                }
             }
 
             let html = `
@@ -818,7 +826,6 @@
                     <h2>${homeTeam} 🆚 ${awayTeam}</h2>
                     <p><strong>ליגה:</strong> ${league.name || 'ליגה'}</p>
                     <p><strong>תאריך:</strong> ${formattedDate}</p>
-                    ${matchStatus ? `<p><strong>סטטוס:</strong> ${matchStatus}</p>` : ''}
                     <p><strong>מספר משחק:</strong> ${data.fixture_id}</p>
                 </div>
 
@@ -844,7 +851,6 @@
                             <th>ערך</th>
                             <th>Pinnacle</th>
                             <th>Bet365</th>
-                            <th>הפרש</th>
                             <th>אחוז הפרש</th>
                             <th>טוב יותר</th>
                         </tr>
@@ -855,12 +861,12 @@
             data.comparisons.forEach(comparison => {
                 html += `
                     <tr class="bet-type-header">
-                        <td colspan="7"><strong>${comparison.bet_name}</strong></td>
+                        <td colspan="6"><strong>${comparison.bet_name}</strong></td>
                     </tr>
                 `;
 
                 comparison.values.forEach(value => {
-                    const diffClass = value.difference > 0 ? 'positive' : value.difference < 0 ? 'negative' : 'neutral';
+                    const diffClass = value.percent_difference > 0 ? 'positive' : value.percent_difference < 0 ? 'negative' : 'neutral';
                     const betterBadge = value.better === 'bookmaker1' 
                         ? `<span class="better-badge bookmaker1">Pinnacle</span>`
                         : value.better === 'bookmaker2'
@@ -873,7 +879,6 @@
                             <td><strong>${value.value}</strong></td>
                             <td><span class="odd-value">${value.bookmaker1_odd}</span></td>
                             <td><span class="odd-value">${value.bookmaker2_odd}</span></td>
-                            <td><span class="difference ${diffClass}">${value.difference > 0 ? '+' : ''}${value.difference}</span></td>
                             <td><span class="difference ${diffClass}">${value.percent_difference > 0 ? '+' : ''}${value.percent_difference}%</span></td>
                             <td>${betterBadge}</td>
                         </tr>
